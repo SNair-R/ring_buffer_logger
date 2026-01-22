@@ -1,11 +1,20 @@
 #include <stdio.h>
 #include "event_log.h"
 
+// log level string representations
+static const char *Log_Lvl_Str[] = {
+    "DEBUG",
+    "INFO",
+    "WARN",
+    "ERROR",
+    "FATAL"
+};
+
 // tester main function
 int main(void)
 {
     // sets up storage and ring buffer
-    uint8_t storage[10];
+    LogEvent storage[10];
     RingBuffer rb;
 
     // initlizes the ring buffer
@@ -14,15 +23,40 @@ int main(void)
         return 1;
     }
 
-    // pushes some data into the ring buffer
-    rb_push(&rb, 'A');
-    rb_push(&rb, 'B');
-    rb_push(&rb, 'C');
+// example log events to push into the ring buffer
+LogEvent e1 = {
+    .ts = 1,
+    .level = LOG_INFO,
+    .id = 1,         
+    .value = 0
+};
+LogEvent e2 = {
+    .ts = 42,
+    .level = LOG_WARN,
+    .id = 2,           
+    .value = 78         
+};
+LogEvent e3 = {
+    .ts = 100,
+    .level = LOG_FATAL,
+    .id = 3,          
+    .value = -1
+};
+
+// pushes example log events into the ring buffer
+rb_push(&rb, e1);
+rb_push(&rb, e2);
+rb_push(&rb, e3);
+
+
 
     // pops and prints data from the ring buffer
-    uint8_t out;
+    LogEvent out;
     while (rb_pop(&rb, &out)) {
-        printf("Popped: %c\n", out);
+        printf(
+            "Time Stamp: %us\nLevel %s\n Event ID: %u\nValue: %d\n\n",
+            out.ts, Log_Lvl_Str[out.level], out.id, out.value
+        );
     }
 
     return 0;
